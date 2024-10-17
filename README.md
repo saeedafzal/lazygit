@@ -535,3 +535,6 @@ If you find that lazygit doesn't quite satisfy your requirements, these may be a
 
 - [GitUI](https://github.com/Extrawurst/gitui)
 - [tig](https://github.com/jonas/tig)
+
+## Fork
+- Change co-author behaviour to change format from `Jane Doe <jane.doe@email.com>` to `jane.doe@email.com`.
