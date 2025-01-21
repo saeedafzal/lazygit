@@ -109,10 +109,10 @@ func (self *BranchCommands) CurrentBranchName() (string, error) {
 }
 
 // LocalDelete delete branch locally
-func (self *BranchCommands) LocalDelete(branch string, force bool) error {
+func (self *BranchCommands) LocalDelete(branches []string, force bool) error {
 	cmdArgs := NewGitCmd("branch").
 		ArgIfElse(force, "-D", "-d").
-		Arg(branch).
+		Arg(branches...).
 		ToArgv()
 
 	return self.cmd.New(cmdArgs).Run()
@@ -275,6 +275,7 @@ func (self *BranchCommands) IsBranchMerged(branch *models.Branch, mainBranches *
 		Arg(lo.Map(branchesToCheckAgainst, func(branch string, _ int) string {
 			return fmt.Sprintf("^%s", branch)
 		})...).
+		Arg("--").
 		ToArgv()
 
 	stdout, _, err := self.cmd.New(cmdArgs).RunWithOutputs()

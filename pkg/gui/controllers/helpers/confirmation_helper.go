@@ -3,12 +3,11 @@ package helpers
 import (
 	goContext "context"
 	"fmt"
-	"strings"
 
 	"github.com/jesseduffield/lazygit/pkg/gui/style"
 	"github.com/jesseduffield/lazygit/pkg/gui/types"
 	"github.com/jesseduffield/lazygit/pkg/theme"
-	"github.com/mattn/go-runewidth"
+	"github.com/jesseduffield/lazygit/pkg/utils"
 )
 
 type ConfirmationHelper struct {
@@ -57,61 +56,9 @@ func (self *ConfirmationHelper) DeactivateConfirmationPrompt() {
 	self.clearConfirmationViewKeyBindings()
 }
 
-// Temporary hack: we're just duplicating the logic in `gocui.lineWrap`
-func getMessageHeight(wrap bool, message string, width int) int {
-	return len(wrapMessageToWidth(wrap, message, width))
-}
-
-func wrapMessageToWidth(wrap bool, message string, width int) []string {
-	lines := strings.Split(message, "\n")
-	if !wrap {
-		return lines
-	}
-
-	wrappedLines := make([]string, 0, len(lines))
-
-	for _, line := range lines {
-		n := 0
-		offset := 0
-		lastWhitespaceIndex := -1
-		for i, currChr := range line {
-			rw := runewidth.RuneWidth(currChr)
-			n += rw
-
-			if n > width {
-				if currChr == ' ' {
-					wrappedLines = append(wrappedLines, line[offset:i])
-					offset = i + 1
-					n = 0
-				} else if currChr == '-' {
-					wrappedLines = append(wrappedLines, line[offset:i])
-					offset = i
-					n = rw
-				} else if lastWhitespaceIndex != -1 && lastWhitespaceIndex+1 != i {
-					if line[lastWhitespaceIndex] == '-' {
-						wrappedLines = append(wrappedLines, line[offset:lastWhitespaceIndex+1])
-						offset = lastWhitespaceIndex + 1
-						n = i - lastWhitespaceIndex
-					} else {
-						wrappedLines = append(wrappedLines, line[offset:lastWhitespaceIndex])
-						offset = lastWhitespaceIndex + 1
-						n = i - lastWhitespaceIndex + 1
-					}
-				} else {
-					wrappedLines = append(wrappedLines, line[offset:i])
-					offset = i
-					n = rw
-				}
-				lastWhitespaceIndex = -1
-			} else if currChr == ' ' || currChr == '-' {
-				lastWhitespaceIndex = i
-			}
-		}
-
-		wrappedLines = append(wrappedLines, line[offset:])
-	}
-
-	return wrappedLines
+func getMessageHeight(wrap bool, editable bool, message string, width int) int {
+	wrappedLines, _, _ := utils.WrapViewLinesToWidth(wrap, editable, message, width)
+	return len(wrappedLines)
 }
 
 func (self *ConfirmationHelper) getPopupPanelDimensionsForContentHeight(panelWidth, contentHeight int, parentPopupContext types.Context) (int, int, int, int) {
@@ -318,7 +265,7 @@ func (self *ConfirmationHelper) resizeMenu(parentPopupContext types.Context) {
 	if selectedItem != nil {
 		tooltip = self.TooltipForMenuItem(selectedItem)
 	}
-	tooltipHeight := getMessageHeight(true, tooltip, contentWidth) + 2 // plus 2 for the frame
+	tooltipHeight := getMessageHeight(true, false, tooltip, contentWidth) + 2 // plus 2 for the frame
 	_, _ = self.c.GocuiGui().SetView(self.c.Views().Tooltip.Name(), x0, tooltipTop, x1, tooltipTop+tooltipHeight-1, 0)
 }
 
@@ -329,7 +276,7 @@ func (self *ConfirmationHelper) layoutMenuPrompt(contentWidth int) int {
 	var promptLines []string
 	prompt := self.c.Contexts().Menu.GetPrompt()
 	if len(prompt) > 0 {
-		promptLines = wrapMessageToWidth(true, prompt, contentWidth)
+		promptLines, _, _ = utils.WrapViewLinesToWidth(true, false, prompt, contentWidth)
 		promptLines = append(promptLines, "")
 	}
 	self.c.Contexts().Menu.SetPromptLines(promptLines)
@@ -357,13 +304,15 @@ func (self *ConfirmationHelper) resizeConfirmationPanel(parentPopupContext types
 		suggestionsViewHeight = 11
 	}
 	panelWidth := self.getPopupPanelWidth()
+	contentWidth := panelWidth - 2 // minus 2 for the frame
 	prompt := self.c.Views().Confirmation.Buffer()
 	wrap := true
-	if self.c.Views().Confirmation.Editable {
+	editable := self.c.Views().Confirmation.Editable
+	if editable {
 		prompt = self.c.Views().Confirmation.TextArea.GetContent()
 		wrap = false
 	}
-	panelHeight := getMessageHeight(wrap, prompt, panelWidth) + suggestionsViewHeight
+	panelHeight := getMessageHeight(wrap, editable, prompt, contentWidth) + suggestionsViewHeight
 	x0, y0, x1, y1 := self.getPopupPanelDimensionsAux(panelWidth, panelHeight, parentPopupContext)
 	confirmationViewBottom := y1 - suggestionsViewHeight
 	_, _ = self.c.GocuiGui().SetView(self.c.Views().Confirmation.Name(), x0, y0, x1, confirmationViewBottom, 0)
@@ -376,7 +325,7 @@ func (self *ConfirmationHelper) ResizeCommitMessagePanels(parentPopupContext typ
 	panelWidth := self.getPopupPanelWidth()
 	content := self.c.Views().CommitDescription.TextArea.GetContent()
 	summaryViewHeight := 3
-	panelHeight := getMessageHeight(false, content, panelWidth)
+	panelHeight := getMessageHeight(false, true, content, panelWidth)
 	minHeight := 7
 	if panelHeight < minHeight {
 		panelHeight = minHeight

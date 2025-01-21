@@ -308,6 +308,8 @@ If you would instead like to start an interactive rebase from the selected commi
 | `` a `` | Toggle all files included in patch | Add/remove all commit's files to custom patch. See https://github.com/jesseduffield/lazygit#rebase-magic-custom-patches. |
 | `` <enter> `` | Enter file to add selected lines to the patch (or toggle directory collapsed) | If a file is selected, enter the file so that you can add/remove individual lines to the custom patch. If a directory is selected, toggle the directory. |
 | `` ` `` | 파일 트리뷰로 전환 | Toggle file view between flat and tree layout. Flat layout shows all file paths in a single list, tree layout groups files by directory. |
+| `` - `` | Collapse all files | Collapse all directories in the files tree |
+| `` = `` | Expand all files | Expand all directories in the file tree |
 | `` / `` | 검색 시작 |  |
 
 ## 커밋메시지
@@ -321,7 +323,7 @@ If you would instead like to start an interactive rebase from the selected commi
 
 | Key | Action | Info |
 |-----|--------|-------------|
-| `` <space> `` | 체크아웃 | Checkout the selected tag tag as a detached HEAD. |
+| `` <space> `` | 체크아웃 | Checkout the selected tag as a detached HEAD. |
 | `` n `` | 태그를 생성 | Create new tag from current commit. You'll be prompted to enter a tag name and optional description. |
 | `` d `` | Delete | View delete options for local/remote tag. |
 | `` P `` | 태그를 push | Push the selected tag to a remote. You'll be prompted to select a remote. |
@@ -359,6 +361,8 @@ If you would instead like to start an interactive rebase from the selected commi
 | `` <c-t> `` | Open external diff tool (git difftool) |  |
 | `` M `` | Git mergetool를 열기 | Run `git mergetool`. |
 | `` f `` | Fetch | Fetch changes from remote. |
+| `` - `` | Collapse all files | Collapse all directories in the files tree |
+| `` = `` | Expand all files | Expand all directories in the file tree |
 | `` / `` | 검색 시작 |  |
 
 ## 확인 패널
