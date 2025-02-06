@@ -353,6 +353,9 @@ type TranslationSet struct {
 	ScrollDownMainWindow                  string
 	AmendCommitTitle                      string
 	AmendCommitPrompt                     string
+	AmendCommitWithConflictsMenuPrompt    string
+	AmendCommitWithConflictsContinue      string
+	AmendCommitWithConflictsAmend         string
 	DropCommitTitle                       string
 	DropCommitPrompt                      string
 	DropUpdateRefPrompt                   string
@@ -518,8 +521,10 @@ type TranslationSet struct {
 	DeleteTagTitle                        string
 	DeleteLocalTag                        string
 	DeleteRemoteTag                       string
+	DeleteLocalAndRemoteTag               string
 	SelectRemoteTagUpstream               string
 	DeleteRemoteTagPrompt                 string
+	DeleteLocalAndRemoteTagPrompt         string
 	RemoteTagDeletedMessage               string
 	PushTagTitle                          string
 	PushTag                               string
@@ -612,9 +617,11 @@ type TranslationSet struct {
 	CommitMessage                         string
 	CommitSubject                         string
 	CommitAuthor                          string
+	CommitTags                            string
 	CopyCommitAttributeToClipboard        string
 	CopyCommitAttributeToClipboardTooltip string
 	CopyBranchNameToClipboard             string
+	CopyTagToClipboard                    string
 	CopyPathToClipboard                   string
 	CommitPrefixPatternError              string
 	CopySelectedTextToClipboard           string
@@ -674,6 +681,8 @@ type TranslationSet struct {
 	CommitMessageCopiedToClipboard           string
 	CommitSubjectCopiedToClipboard           string
 	CommitAuthorCopiedToClipboard            string
+	CommitTagsCopiedToClipboard              string
+	CommitHasNoTags                          string
 	PatchCopiedToClipboard                   string
 	CopiedToClipboard                        string
 	ErrCannotEditDirectory                   string
@@ -905,6 +914,7 @@ type Actions struct {
 	CopyCommitURLToClipboard          string
 	CopyCommitAuthorToClipboard       string
 	CopyCommitAttributeToClipboard    string
+	CopyCommitTagsToClipboard         string
 	CopyPatchToClipboard              string
 	CustomCommand                     string
 	DiscardAllChangesInDirectory      string
@@ -916,6 +926,8 @@ type Actions struct {
 	UnstageFile                       string
 	UnstageAllFiles                   string
 	StageAllFiles                     string
+	NotEnoughContextToStage           string
+	NotEnoughContextToDiscard         string
 	IgnoreExcludeFile                 string
 	IgnoreFileErr                     string
 	ExcludeFile                       string
@@ -1368,6 +1380,9 @@ func EnglishTranslationSet() *TranslationSet {
 		ScrollDownMainWindow:                 "Scroll down main window",
 		AmendCommitTitle:                     "Amend commit",
 		AmendCommitPrompt:                    "Are you sure you want to amend this commit with your staged files?",
+		AmendCommitWithConflictsMenuPrompt:   "WARNING: you are about to amend the last finished commit with your resolved conflicts. This is very unlikely to be what you want at this point. More likely, you simply want to continue the rebase instead.\n\nDo you still want to amend the previous commit?",
+		AmendCommitWithConflictsContinue:     "No, continue rebase",
+		AmendCommitWithConflictsAmend:        "Yes, amend previous commit",
 		DropCommitTitle:                      "Drop commit",
 		DropCommitPrompt:                     "Are you sure you want to drop the selected commit(s)?",
 		DropMergeCommitPrompt:                "Are you sure you want to drop the selected merge commit? Note that it will also drop all the commits that were merged in by it.",
@@ -1534,9 +1549,11 @@ func EnglishTranslationSet() *TranslationSet {
 		DeleteTagTitle:                       "Delete tag '{{.tagName}}'?",
 		DeleteLocalTag:                       "Delete local tag",
 		DeleteRemoteTag:                      "Delete remote tag",
+		DeleteLocalAndRemoteTag:              "Delete local and remote tag",
 		RemoteTagDeletedMessage:              "Remote tag deleted",
 		SelectRemoteTagUpstream:              "Remote from which to remove tag '{{.tagName}}':",
 		DeleteRemoteTagPrompt:                "Are you sure you want to delete the remote tag '{{.tagName}}' from '{{.upstream}}'?",
+		DeleteLocalAndRemoteTagPrompt:        "Are you sure you want to delete '{{.tagName}}' from both your machine and from '{{.upstream}}'?",
 		PushTagTitle:                         "Remote to push tag '{{.tagName}}' to:",
 		// Using 'push tag' rather than just 'push' to disambiguate from a global push
 		PushTag:                        "Push tag",
@@ -1627,9 +1644,11 @@ func EnglishTranslationSet() *TranslationSet {
 		CommitMessage:                            "Commit message",
 		CommitSubject:                            "Commit subject",
 		CommitAuthor:                             "Commit author",
+		CommitTags:                               "Commit tags",
 		CopyCommitAttributeToClipboard:           "Copy commit attribute to clipboard",
 		CopyCommitAttributeToClipboardTooltip:    "Copy commit attribute to clipboard (e.g. hash, URL, diff, message, author).",
 		CopyBranchNameToClipboard:                "Copy branch name to clipboard",
+		CopyTagToClipboard:                       "Copy tag to clipboard",
 		CopyPathToClipboard:                      "Copy path to clipboard",
 		CopySelectedTextToClipboard:              "Copy selected text to clipboard",
 		CommitPrefixPatternError:                 "Error in commitPrefix pattern",
@@ -1688,6 +1707,8 @@ func EnglishTranslationSet() *TranslationSet {
 		CommitMessageCopiedToClipboard:           "Commit message copied to clipboard",
 		CommitSubjectCopiedToClipboard:           "Commit subject copied to clipboard",
 		CommitAuthorCopiedToClipboard:            "Commit author copied to clipboard",
+		CommitTagsCopiedToClipboard:              "Commit tags copied to clipboard",
+		CommitHasNoTags:                          "Commit has no tags",
 		PatchCopiedToClipboard:                   "Patch copied to clipboard",
 		CopiedToClipboard:                        "copied to clipboard",
 		ErrCannotEditDirectory:                   "Cannot edit directories: you can only edit individual files",
@@ -1872,6 +1893,7 @@ func EnglishTranslationSet() *TranslationSet {
 			CreateAnnotatedTag:             "Create annotated tag",
 			CopyCommitMessageToClipboard:   "Copy commit message to clipboard",
 			CopyCommitSubjectToClipboard:   "Copy commit subject to clipboard",
+			CopyCommitTagsToClipboard:      "Copy commit tags to clipboard",
 			CopyCommitDiffToClipboard:      "Copy commit diff to clipboard",
 			CopyCommitHashToClipboard:      "Copy full commit hash to clipboard",
 			CopyCommitURLToClipboard:       "Copy commit URL to clipboard",
@@ -1893,6 +1915,8 @@ func EnglishTranslationSet() *TranslationSet {
 			UnstageFile:                     "Unstage file",
 			UnstageAllFiles:                 "Unstage all files",
 			StageAllFiles:                   "Stage all files",
+			NotEnoughContextToStage:         "Staging or unstaging changes is not possible with a diff context size of 0. Increase the context using '%s'.",
+			NotEnoughContextToDiscard:       "Discarding changes is not possible with a diff context size of 0. Increase the context using '%s'.",
 			IgnoreExcludeFile:               "Ignore or exclude file",
 			IgnoreFileErr:                   "Cannot ignore .gitignore",
 			ExcludeFile:                     "Exclude file",
