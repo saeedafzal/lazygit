@@ -70,7 +70,11 @@ func AddCoAuthorToDescription(description string, author string) string {
 		}
 	}
 
-	return description + fmt.Sprintf("Co-authored-by: %s", author)
+	// FORK: Change author format from "<email>" to "email".
+	split := strings.Split(author, "<")
+	email := strings.TrimSuffix(split[1], ">")
+
+	return description + fmt.Sprintf("Co-authored-by: %s", email)
 }
 
 // ResetToCommit reset to commit

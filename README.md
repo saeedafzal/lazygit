@@ -538,3 +538,6 @@ If you find that lazygit doesn't quite satisfy your requirements, these may be a
 
 - [GitUI](https://github.com/Extrawurst/gitui)
 - [tig](https://github.com/jonas/tig)
+
+# Fork
+- Update format of co-author in commits.
